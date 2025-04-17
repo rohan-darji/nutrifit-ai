@@ -96,6 +96,11 @@ const AppContent: React.FC = () => {
             <AuthPage />
           </AuthRoute>
         } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        } />
         <Route path="/onboarding" element={
           <OnboardingRoute>
             <OnboardingPage />

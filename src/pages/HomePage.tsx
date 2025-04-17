@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { ImageCapture } from "@/components/ImageCapture";
 import { NutritionDisplay } from "@/components/NutritionDisplay";
 import { useNutrition } from "@/contexts/NutritionContext";
-import { LogOut, User, History } from "lucide-react";
+import { LogOut, User, History, Shield } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const HomePage: React.FC = () => {
   const { user, logout } = useAuth();
@@ -17,11 +18,18 @@ const HomePage: React.FC = () => {
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-xl font-bold">NutriFit</h1>
           <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" asChild>
+              <Link to="/profile">
+                <Shield className="h-5 w-5" />
+              </Link>
+            </Button>
             <Button variant="ghost" size="icon">
               <History className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
+            <Button variant="ghost" size="icon" asChild>
+              <Link to="/profile">
+                <User className="h-5 w-5" />
+              </Link>
             </Button>
             <Button variant="ghost" size="icon" onClick={logout}>
               <LogOut className="h-5 w-5" />

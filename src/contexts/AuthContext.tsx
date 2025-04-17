@@ -2,11 +2,12 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { AuthState, User } from "@/types";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,56 +21,62 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check for saved user in localStorage
-    const savedUser = localStorage.getItem("nutrifit_user");
-    if (savedUser) {
-      try {
-        const parsedUser = JSON.parse(savedUser);
+    // Check current session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
         setState({
-          user: parsedUser,
+          user: session.user,
           isAuthenticated: true,
           isLoading: false,
         });
-      } catch (error) {
-        localStorage.removeItem("nutrifit_user");
-        setState({ ...state, isLoading: false });
+      } else {
+        setState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+        });
       }
-    } else {
-      setState({ ...state, isLoading: false });
-    }
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        setState({
+          user: session.user,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+      } else {
+        setState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+        });
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
-    // Simulated login logic
     try {
-      // In a real app, this would validate credentials against a backend
-      if (email && password) {
-        // Mock user data
-        const user: User = {
-          id: Math.random().toString(36).substr(2, 9),
-          email,
-          name: email.split('@')[0],
-        };
-        
-        localStorage.setItem("nutrifit_user", JSON.stringify(user));
-        
-        setState({
-          user,
-          isAuthenticated: true,
-          isLoading: false,
-        });
-        
-        toast({
-          title: "Login successful",
-          description: "Welcome back to NutriFit!",
-        });
-      } else {
-        throw new Error("Invalid credentials");
-      }
-    } catch (error) {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Login successful",
+        description: "Welcome back to NutriFit!",
+      });
+    } catch (error: any) {
       toast({
         title: "Login failed",
-        description: "Please check your email and password",
+        description: error.message,
         variant: "destructive",
       });
       throw error;
@@ -77,52 +84,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signup = async (email: string, password: string, name: string) => {
-    // Simulated signup logic
     try {
-      if (email && password && name) {
-        // Mock user creation
-        const user: User = {
-          id: Math.random().toString(36).substr(2, 9),
-          email,
-          name,
-        };
-        
-        localStorage.setItem("nutrifit_user", JSON.stringify(user));
-        
-        setState({
-          user,
-          isAuthenticated: true,
-          isLoading: false,
-        });
-        
-        toast({
-          title: "Account created",
-          description: "Welcome to NutriFit!",
-        });
-      } else {
-        throw new Error("Please fill all required fields");
-      }
-    } catch (error) {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Account created",
+        description: "Welcome to NutriFit!",
+      });
+    } catch (error: any) {
       toast({
         title: "Signup failed",
-        description: "Could not create your account. Please try again.",
+        description: error.message,
         variant: "destructive",
       });
       throw error;
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem("nutrifit_user");
-    setState({
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
-    });
-    toast({
-      title: "Logged out",
-      description: "You have been logged out successfully",
-    });
+  const logout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
+      toast({
+        title: "Logged out",
+        description: "You have been logged out successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Logout failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
