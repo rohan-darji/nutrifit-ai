@@ -11,6 +11,7 @@ import { OnboardingProvider, useOnboarding } from "@/contexts/OnboardingContext"
 import HomePage from "./pages/HomePage";
 import AuthPage from "./pages/AuthPage";
 import OnboardingPage from "./pages/OnboardingPage";
+import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

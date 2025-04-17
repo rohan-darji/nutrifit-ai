@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { AuthState, User } from "@/types";
+import { AuthState } from "@/types";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -25,7 +25,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         setState({
-          user: session.user,
+          user: {
+            id: session.user.id,
+            email: session.user.email,
+          },
           isAuthenticated: true,
           isLoading: false,
         });
@@ -42,7 +45,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
         setState({
-          user: session.user,
+          user: {
+            id: session.user.id,
+            email: session.user.email,
+          },
           isAuthenticated: true,
           isLoading: false,
         });

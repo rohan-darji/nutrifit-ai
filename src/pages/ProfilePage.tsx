@@ -16,7 +16,7 @@ const ProfilePage = () => {
   const { toast } = useToast();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [allergies, setAllergies] = useState<Allergy[]>([]);
-  const [newAllergy, setNewAllergy] = useState({ substance: '', severity: 'mild' });
+  const [newAllergy, setNewAllergy] = useState({ substance: '', severity: 'mild' as 'mild' | 'moderate' | 'severe' });
   const [fullName, setFullName] = useState('');
 
   useEffect(() => {
@@ -55,7 +55,13 @@ const ProfilePage = () => {
       return;
     }
 
-    setAllergies(data || []);
+    // Convert string severity to the proper type
+    const typedAllergies = data?.map(allergy => ({
+      ...allergy,
+      severity: allergy.severity as 'mild' | 'moderate' | 'severe'
+    })) || [];
+    
+    setAllergies(typedAllergies);
   };
 
   const updateProfile = async () => {
