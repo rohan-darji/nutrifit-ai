@@ -69,35 +69,60 @@ export const NutritionDisplay: React.FC = () => {
                   <span className="text-sm">Carbohydrates</span>
                   <span className="text-sm">{result.nutrient_breakdown.carbohydrates}</span>
                 </div>
-                <Progress value={extractPercentage(result.nutrient_breakdown.carbohydrates)} className="bg-secondary h-2" indicatorClassName="bg-nutriorange" />
+                <div className="relative w-full h-2 bg-secondary rounded-full overflow-hidden">
+                  <div 
+                    className="absolute h-full bg-nutriorange" 
+                    style={{ width: `${extractPercentage(result.nutrient_breakdown.carbohydrates)}%` }}
+                  />
+                </div>
               </div>
               <div>
                 <div className="flex justify-between mb-1">
                   <span className="text-sm">Protein</span>
                   <span className="text-sm">{result.nutrient_breakdown.protein}</span>
                 </div>
-                <Progress value={extractPercentage(result.nutrient_breakdown.protein)} className="bg-secondary h-2" indicatorClassName="bg-nutripurple" />
+                <div className="relative w-full h-2 bg-secondary rounded-full overflow-hidden">
+                  <div 
+                    className="absolute h-full bg-nutripurple" 
+                    style={{ width: `${extractPercentage(result.nutrient_breakdown.protein)}%` }}
+                  />
+                </div>
               </div>
               <div>
                 <div className="flex justify-between mb-1">
                   <span className="text-sm">Fats</span>
                   <span className="text-sm">{result.nutrient_breakdown.fats}</span>
                 </div>
-                <Progress value={extractPercentage(result.nutrient_breakdown.fats)} className="bg-secondary h-2" indicatorClassName="bg-amber-400" />
+                <div className="relative w-full h-2 bg-secondary rounded-full overflow-hidden">
+                  <div 
+                    className="absolute h-full bg-amber-400" 
+                    style={{ width: `${extractPercentage(result.nutrient_breakdown.fats)}%` }}
+                  />
+                </div>
               </div>
               <div>
                 <div className="flex justify-between mb-1">
                   <span className="text-sm">Fiber</span>
                   <span className="text-sm">{result.nutrient_breakdown.fiber}</span>
                 </div>
-                <Progress value={extractPercentage(result.nutrient_breakdown.fiber)} className="bg-secondary h-2" indicatorClassName="bg-nutrigreen" />
+                <div className="relative w-full h-2 bg-secondary rounded-full overflow-hidden">
+                  <div 
+                    className="absolute h-full bg-nutrigreen" 
+                    style={{ width: `${extractPercentage(result.nutrient_breakdown.fiber)}%` }}
+                  />
+                </div>
               </div>
               <div>
                 <div className="flex justify-between mb-1">
                   <span className="text-sm">Sugar</span>
                   <span className="text-sm">{result.nutrient_breakdown.sugar}</span>
                 </div>
-                <Progress value={extractPercentage(result.nutrient_breakdown.sugar)} className="bg-secondary h-2" indicatorClassName="bg-red-500" />
+                <div className="relative w-full h-2 bg-secondary rounded-full overflow-hidden">
+                  <div 
+                    className="absolute h-full bg-red-500" 
+                    style={{ width: `${extractPercentage(result.nutrient_breakdown.sugar)}%` }}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
