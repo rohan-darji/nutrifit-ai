@@ -1,22 +1,16 @@
-# Welcome to your Lovable project
+# NutriFit.ai - Your Personal Food Nutrition Analyzer
 
-## Project info
+## Project Overview
 
-**URL**: https://lovable.dev/projects/0f393426-2926-4ed5-89d1-4164ae6cfe25
+NutriFit.ai is a web application that helps users analyze their food nutrition. The application provides personalized nutrition insights and recommendations based on user input.
 
 ## How can I edit this code?
 
 There are several ways of editing your application.
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/0f393426-2926-4ed5-89d1-4164ae6cfe25) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
 **Use your preferred IDE**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+If you want to work locally using your own IDE, you can clone this repo and push changes.
 
 The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
@@ -59,15 +53,24 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- Supabase (Authentication & Database)
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/0f393426-2926-4ed5-89d1-4164ae6cfe25) and click on Share -> Publish.
+You can deploy this project using various hosting platforms:
 
-## Can I connect a custom domain to my Lovable project?
+1. **Vercel**: Connect your GitHub repository to Vercel for automatic deployments
+2. **Netlify**: Connect your GitHub repository to Netlify for automatic deployments
+3. **GitHub Pages**: Set up GitHub Actions to deploy to GitHub Pages
+
+## Can I connect a custom domain to my project?
 
 Yes, you can!
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Most hosting platforms like Vercel, Netlify, and GitHub Pages allow you to connect custom domains to your projects. Check the documentation of your chosen hosting platform for specific instructions on how to set up a custom domain.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+The MIT License is a permissive license that allows you to use, modify, and distribute this software for any purpose, as long as you include the original copyright and license notice in any copy or substantial portion of the software.
