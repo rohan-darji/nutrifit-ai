@@ -13,6 +13,7 @@ import OnboardingPage from "./pages/OnboardingPage";
 import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
 import React from "react";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 
 const queryClient = new QueryClient();
 
@@ -119,6 +120,11 @@ const AppContent: React.FC = () => {
         <Route path="/auth" element={
           <AuthRoute>
             <AuthPage />
+          </AuthRoute>
+        } />
+        <Route path="/forgot-password" element={
+          <AuthRoute>
+            <ForgotPasswordPage />
           </AuthRoute>
         } />
         <Route path="/profile" element={

@@ -1,11 +1,10 @@
-
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { ImageCapture } from "@/components/ImageCapture";
 import { NutritionDisplay } from "@/components/NutritionDisplay";
 import { useNutrition } from "@/contexts/NutritionContext";
-import { LogOut, User, History, Shield } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
@@ -19,14 +18,6 @@ const HomePage: React.FC = () => {
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-xl font-bold">NutriFit.ai</h1>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" asChild>
-              <Link to="/profile">
-                <Shield className="h-5 w-5" />
-              </Link>
-            </Button>
-            <Button variant="ghost" size="icon">
-              <History className="h-5 w-5" />
-            </Button>
             <Button variant="ghost" size="icon" asChild>
               <Link to="/profile">
                 <Avatar className="h-8 w-8">

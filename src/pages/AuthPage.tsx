@@ -6,12 +6,19 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { Leaf } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 const AuthPage: React.FC = () => {
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({ name: "", email: "", password: "" });
+  const [newPassword, setNewPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { login, signup } = useAuth();
+  const [searchParams] = useSearchParams();
+  const { toast } = useToast();
+  const isReset = searchParams.get("reset") === "true";
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +44,62 @@ const AuthPage: React.FC = () => {
     }
   };
 
+  if (isReset) {
+    return (
+      <div className="min-h-screen flex flex-col justify-center items-center p-6 bg-background">
+        <div className="w-full max-w-md space-y-8">
+          <Card>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              setIsLoading(true);
+              try {
+                const { error } = await supabase.auth.updateUser({
+                  password: newPassword
+                });
+                if (error) throw error;
+                toast({
+                  title: "Password updated",
+                  description: "Your password has been updated successfully. Please log in.",
+                });
+                window.location.href = "/auth";
+              } catch (error: any) {
+                toast({
+                  title: "Error",
+                  description: error.message,
+                  variant: "destructive",
+                });
+              } finally {
+                setIsLoading(false);
+              }
+            }}>
+              <CardHeader>
+                <CardTitle>Set New Password</CardTitle>
+                <CardDescription>Enter your new password</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="new-password">New Password</Label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? "Updating..." : "Update Password"}
+                </Button>
+              </CardFooter>
+            </form>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col justify-center items-center p-6 bg-background">
       <div className="w-full max-w-md space-y-8">
@@ -50,7 +113,7 @@ const AuthPage: React.FC = () => {
           <p className="text-muted-foreground mt-2">Your personal food nutrition analyzer</p>
         </div>
 
-        <Tabs defaultValue="login" className="w-full">
+        <Tabs defaultValue="login" className="w-full max-w-md">
           <TabsList className="grid grid-cols-2 w-full">
             <TabsTrigger value="login">Login</TabsTrigger>
             <TabsTrigger value="signup">Sign up</TabsTrigger>
@@ -87,10 +150,16 @@ const AuthPage: React.FC = () => {
                     />
                   </div>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="flex flex-col space-y-2">
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? "Logging in..." : "Login"}
                   </Button>
+                  <Link 
+                    to="/forgot-password"
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    Forgot password?
+                  </Link>
                 </CardFooter>
               </form>
             </Card>
