@@ -21,13 +21,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { toast } = useToast();
 
   useEffect(() => {
+    // Fetch the user profile to get avatar_url
+    const fetchProfile = async (userId: string) => {
+      try {
+        const { data } = await supabase
+          .from('profiles')
+          .select('avatar_url')
+          .eq('id', userId)
+          .single();
+        
+        return data?.avatar_url;
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        return null;
+      }
+    };
+
     // Check current session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
+        const avatar_url = await fetchProfile(session.user.id);
         setState({
           user: {
             id: session.user.id,
             email: session.user.email,
+            avatar_url,
           },
           isAuthenticated: true,
           isLoading: false,
@@ -42,12 +60,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session) {
+        const avatar_url = await fetchProfile(session.user.id);
         setState({
           user: {
             id: session.user.id,
             email: session.user.email,
+            avatar_url,
           },
           isAuthenticated: true,
           isLoading: false,

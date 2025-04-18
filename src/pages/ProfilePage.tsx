@@ -89,6 +89,42 @@ const ProfilePage = () => {
     }
   };
 
+  const addAllergy = async () => {
+    if (!user || !newAllergy.substance) return;
+
+    const { error } = await supabase
+      .from('allergies')
+      .insert({
+        user_id: user.id,
+        substance: newAllergy.substance,
+        severity: newAllergy.severity
+      });
+
+    if (error) {
+      toast({ title: 'Error', description: 'Failed to add allergy', variant: 'destructive' });
+      return;
+    }
+
+    toast({ title: 'Success', description: 'Allergy added successfully' });
+    setNewAllergy({ substance: '', severity: 'mild' });
+    await fetchAllergies();
+  };
+
+  const removeAllergy = async (id: string) => {
+    const { error } = await supabase
+      .from('allergies')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      toast({ title: 'Error', description: 'Failed to remove allergy', variant: 'destructive' });
+      return;
+    }
+
+    toast({ title: 'Success', description: 'Allergy removed successfully' });
+    await fetchAllergies();
+  };
+
   return (
     <div className="container mx-auto p-4 space-y-6">
       <Card>
