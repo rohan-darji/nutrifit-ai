@@ -24,28 +24,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Fetch the user profile to get avatar_url
     const fetchProfile = async (userId: string) => {
       try {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('profiles')
-          .select('avatar_url')
+          .select('avatar_url, full_name')
           .eq('id', userId)
           .single();
         
-        return data?.avatar_url;
+        if (error) {
+          console.error('Error fetching profile:', error);
+          return { avatar_url: null, full_name: null };
+        }
+        
+        return data;
       } catch (error) {
         console.error('Error fetching profile:', error);
-        return null;
+        return { avatar_url: null, full_name: null };
       }
     };
 
-    // Check current session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session) {
-        const avatar_url = await fetchProfile(session.user.id);
+        const profile = await fetchProfile(session.user.id);
         setState({
           user: {
             id: session.user.id,
             email: session.user.email,
-            avatar_url,
+            avatar_url: profile?.avatar_url || null,
+            name: profile?.full_name || null,
           },
           isAuthenticated: true,
           isLoading: false,
@@ -59,15 +65,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     });
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // Check current session
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
-        const avatar_url = await fetchProfile(session.user.id);
+        const profile = await fetchProfile(session.user.id);
         setState({
           user: {
             id: session.user.id,
             email: session.user.email,
-            avatar_url,
+            avatar_url: profile?.avatar_url || null,
+            name: profile?.full_name || null,
           },
           isAuthenticated: true,
           isLoading: false,

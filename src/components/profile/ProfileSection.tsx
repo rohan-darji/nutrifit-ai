@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,46 +21,64 @@ export const ProfileSection = () => {
 
   const fetchProfile = async () => {
     if (!user) return;
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
 
-    if (error) {
+      if (error) {
+        console.error('Error fetching profile:', error);
+        toast({ title: 'Error', description: 'Failed to load profile', variant: 'destructive' });
+        return;
+      }
+
+      setProfile(data);
+      setFullName(data?.full_name || '');
+    } catch (error) {
+      console.error('Error in fetchProfile:', error);
       toast({ title: 'Error', description: 'Failed to load profile', variant: 'destructive' });
-      return;
     }
-
-    setProfile(data);
-    setFullName(data.full_name || '');
   };
 
   const updateProfile = async () => {
     if (!user) return;
-    const { error } = await supabase
-      .from('profiles')
-      .update({ full_name: fullName })
-      .eq('id', user.id);
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ full_name: fullName })
+        .eq('id', user.id);
 
-    if (error) {
+      if (error) {
+        console.error('Error updating profile:', error);
+        toast({ title: 'Error', description: 'Failed to update profile', variant: 'destructive' });
+        return;
+      }
+
+      toast({ title: 'Success', description: 'Profile updated successfully' });
+      await fetchProfile();
+    } catch (error) {
+      console.error('Error in updateProfile:', error);
       toast({ title: 'Error', description: 'Failed to update profile', variant: 'destructive' });
-      return;
     }
-
-    toast({ title: 'Success', description: 'Profile updated successfully' });
-    await fetchProfile();
   };
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      await uploadAvatar(file);
-      await fetchProfile();
+      try {
+        await uploadAvatar(file);
+        await fetchProfile();
+      } catch (error) {
+        console.error('Error uploading avatar:', error);
+      }
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (user) {
       fetchProfile();
     }
