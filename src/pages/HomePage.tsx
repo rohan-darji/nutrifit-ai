@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,7 @@ const HomePage: React.FC = () => {
     <div className="min-h-screen bg-background">
       <header className="p-4 border-b border-secondary">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold">NutriFit</h1>
+          <h1 className="text-xl font-bold">NutriFit.ai</h1>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" asChild>
               <Link to="/profile">

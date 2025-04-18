@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,7 +46,7 @@ const AuthPage: React.FC = () => {
               <Leaf className="h-10 w-10 text-primary" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold">NutriFit</h1>
+          <h1 className="text-3xl font-bold">NutriFit.ai</h1>
           <p className="text-muted-foreground mt-2">Your personal food nutrition analyzer</p>
         </div>
 

@@ -77,7 +77,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       toast({
         title: "Login successful",
-        description: "Welcome back to NutriFit!",
+        description: "Welcome back to NutriFit.ai!",
       });
     } catch (error: any) {
       toast({

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useOnboarding } from "@/contexts/OnboardingContext";
@@ -6,7 +5,7 @@ import { Camera, ChevronRight, Info, User } from "lucide-react";
 
 const onboardingSteps = [
   {
-    title: "Welcome to NutriFit",
+    title: "Welcome to NutriFit.ai",
     description: "Discover the nutritional content of any food just by taking a photo.",
     icon: Info,
     color: "bg-primary",
