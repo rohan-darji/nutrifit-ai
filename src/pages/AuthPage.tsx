@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +19,63 @@ const AuthPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const isReset = searchParams.get("reset") === "true";
+  
+  // Check for error parameters in the URL
+  useEffect(() => {
+    const error = searchParams.get("error");
+    const errorDescription = searchParams.get("error_description");
+    
+    if (error) {
+      console.error('Auth error from URL:', error, errorDescription);
+      
+      if (error === "access_denied" && errorDescription?.includes("expired")) {
+        toast({
+          title: "Link Expired",
+          description: "Your password reset link has expired. Please request a new one.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Authentication Error",
+          description: errorDescription || "An error occurred during authentication.",
+          variant: "destructive",
+        });
+      }
+    }
+  }, [searchParams, toast]);
+
+  // Check for password reset token and session
+  useEffect(() => {
+    const checkSession = async () => {
+      if (isReset) {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Session check error:', error);
+          toast({
+            title: "Error",
+            description: "Unable to verify your session. Please try the reset link again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (!session) {
+          console.log('No session found, user needs to click the reset link again');
+          toast({
+            title: "Session Expired",
+            description: "Your reset link has expired. Please request a new one.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        console.log('Session found, user can reset password');
+      }
+    };
+
+    checkSession();
+  }, [isReset, toast]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +105,16 @@ const AuthPage: React.FC = () => {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center p-6 bg-background">
         <div className="w-full max-w-md space-y-8">
+          <div className="text-center">
+            <div className="flex justify-center mb-4">
+              <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center">
+                <Leaf className="h-10 w-10 text-primary" />
+              </div>
+            </div>
+            <h1 className="text-3xl font-bold">Reset Password</h1>
+            <p className="text-muted-foreground mt-2">Enter your new password below</p>
+          </div>
+
           <Card>
             <form onSubmit={async (e) => {
               e.preventDefault();
@@ -56,11 +123,16 @@ const AuthPage: React.FC = () => {
                 const { error } = await supabase.auth.updateUser({
                   password: newPassword
                 });
+
                 if (error) throw error;
+
                 toast({
-                  title: "Password updated",
-                  description: "Your password has been updated successfully. Please log in.",
+                  title: "Password Updated",
+                  description: "Your password has been updated successfully. Please log in with your new password.",
                 });
+
+                // Sign out and redirect to login
+                await supabase.auth.signOut();
                 window.location.href = "/auth";
               } catch (error: any) {
                 toast({
@@ -74,7 +146,7 @@ const AuthPage: React.FC = () => {
             }}>
               <CardHeader>
                 <CardTitle>Set New Password</CardTitle>
-                <CardDescription>Enter your new password</CardDescription>
+                <CardDescription>Please enter your new password</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -82,9 +154,11 @@ const AuthPage: React.FC = () => {
                   <Input
                     id="new-password"
                     type="password"
+                    placeholder="••••••••"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     required
+                    minLength={6}
                   />
                 </div>
               </CardContent>

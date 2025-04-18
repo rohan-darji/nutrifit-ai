@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,9 +26,10 @@ const ForgotPasswordPage: React.FC = () => {
 
       toast({
         title: "Check your email",
-        description: "We've sent you a password reset link.",
+        description: "We've sent you a password reset link. The link will expire in 24 hours. Please check your email and click the link to reset your password.",
       });
     } catch (error: any) {
+      console.error('Reset password error:', error);
       toast({
         title: "Error",
         description: error.message,
@@ -55,7 +55,7 @@ const ForgotPasswordPage: React.FC = () => {
             <CardHeader>
               <CardTitle>Reset Password</CardTitle>
               <CardDescription>
-                Enter your email address and we'll send you a link to reset your password.
+                Enter your email address and we'll send you a link to reset your password. The link will expire in 24 hours.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">

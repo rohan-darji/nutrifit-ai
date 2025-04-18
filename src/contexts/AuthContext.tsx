@@ -7,6 +7,7 @@ interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
+  resetPassword: (newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -218,6 +219,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const resetPassword = async (newPassword: string) => {
+    try {
+      console.log('Starting password reset...');
+      setState(prev => ({ ...prev, isLoading: true }));
+      
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) {
+        console.error('Password reset error:', error);
+        toast({
+          title: "Password Reset Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+        setState(prev => ({ ...prev, isLoading: false }));
+        return;
+      }
+
+      toast({
+        title: "Password Updated",
+        description: "Your password has been updated successfully. Please log in with your new password.",
+      });
+      
+      // Sign out the user after password reset
+      await logout();
+    } catch (error: any) {
+      console.error('Password reset exception:', error);
+      toast({
+        title: "Password Reset Failed",
+        description: "An unexpected error occurred while resetting your password.",
+        variant: "destructive",
+      });
+      setState(prev => ({ ...prev, isLoading: false }));
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -225,6 +264,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         signup,
         logout,
+        resetPassword,
       }}
     >
       {children}
