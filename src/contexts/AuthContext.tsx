@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { AuthState } from "@/types";
 import { useToast } from "@/components/ui/use-toast";
@@ -42,54 +41,90 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session) {
-        const profile = await fetchProfile(session.user.id);
-        setState({
-          user: {
-            id: session.user.id,
-            email: session.user.email,
-            avatar_url: profile?.avatar_url || null,
-            name: profile?.full_name || null,
-          },
-          isAuthenticated: true,
-          isLoading: false,
-        });
-      } else {
+    // Store the subscription for cleanup
+    let subscription: { unsubscribe: () => void } | null = null;
+
+    // First check current session
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session) {
+          const profile = await fetchProfile(session.user.id);
+          setState({
+            user: {
+              id: session.user.id,
+              email: session.user.email,
+              avatar_url: profile?.avatar_url || null,
+              name: profile?.full_name || null,
+            },
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        } else {
+          setState({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+          });
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
         setState({
           user: null,
           isAuthenticated: false,
           isLoading: false,
         });
       }
-    });
+    };
 
-    // Check current session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session) {
-        const profile = await fetchProfile(session.user.id);
-        setState({
-          user: {
-            id: session.user.id,
-            email: session.user.email,
-            avatar_url: profile?.avatar_url || null,
-            name: profile?.full_name || null,
-          },
-          isAuthenticated: true,
-          isLoading: false,
-        });
-      } else {
-        setState({
-          user: null,
-          isAuthenticated: false,
-          isLoading: false,
-        });
-      }
-    });
+    // Setup auth state change listener
+    const setupAuthListener = () => {
+      const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
+        
+        if (session) {
+          try {
+            const profile = await fetchProfile(session.user.id);
+            setState({
+              user: {
+                id: session.user.id,
+                email: session.user.email,
+                avatar_url: profile?.avatar_url || null,
+                name: profile?.full_name || null,
+              },
+              isAuthenticated: true,
+              isLoading: false,
+            });
+          } catch (error) {
+            console.error('Error in auth state change handler:', error);
+            setState(prev => ({ ...prev, isLoading: false }));
+          }
+        } else {
+          setState({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+          });
+        }
+      });
+      
+      subscription = data.subscription;
+    };
 
+    // Initialize auth
+    const initAuth = async () => {
+      setupAuthListener(); // First set up listener
+      await checkSession(); // Then check session
+    };
+
+    initAuth();
+
+    // Cleanup on unmount
     return () => {
-      subscription.unsubscribe();
+      if (subscription) {
+        subscription.unsubscribe();
+      }
     };
   }, []);
 

@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -24,7 +23,10 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+          <p className="text-sm text-muted-foreground">Loading authentication...</p>
+        </div>
       </div>
     );
   }
@@ -48,7 +50,10 @@ const OnboardingRoute: React.FC<{ children: React.ReactNode }> = ({ children }) 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+          <p className="text-sm text-muted-foreground">Loading authentication...</p>
+        </div>
       </div>
     );
   }
@@ -68,15 +73,31 @@ const OnboardingRoute: React.FC<{ children: React.ReactNode }> = ({ children }) 
 const AuthRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
   
-  if (isLoading) {
+  const [forceShow, setForceShow] = React.useState(false);
+  
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      if (isLoading) {
+        console.log('Auth loading timeout triggered');
+        setForceShow(true);
+      }
+    }, 5000);
+    
+    return () => clearTimeout(timer);
+  }, [isLoading]);
+  
+  if (isLoading && !forceShow) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+          <p className="text-sm text-muted-foreground">Loading authentication...</p>
+        </div>
       </div>
     );
   }
   
-  if (isAuthenticated) {
+  if (isAuthenticated && !forceShow) {
     return <Navigate to="/" replace />;
   }
   
