@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { AuthState } from "@/types";
 import { useToast } from "@/components/ui/use-toast";
@@ -21,34 +20,75 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { toast } = useToast();
 
   useEffect(() => {
+    // Set a timeout to ensure loading state is resolved
+    const loadingTimeout = setTimeout(() => {
+      console.log('Loading timeout reached, forcing isLoading to false');
+      setState(prev => ({
+        ...prev,
+        isLoading: false
+      }));
+    }, 5000); // 5 seconds timeout
+    
     // Fetch the user profile to get avatar_url
     const fetchProfile = async (userId: string) => {
       try {
-        const { data } = await supabase
+        console.log('Fetching profile for user:', userId);
+        const { data, error } = await supabase
           .from('profiles')
           .select('avatar_url')
           .eq('id', userId)
           .single();
         
+        if (error) {
+          console.error('Error fetching profile:', error);
+          return null;
+        }
+        
         return data?.avatar_url;
       } catch (error) {
-        console.error('Error fetching profile:', error);
+        console.error('Exception fetching profile:', error);
         return null;
       }
     };
 
     // Check current session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    console.log('Checking Supabase session...');
+    supabase.auth.getSession().then(async ({ data: { session }, error }) => {
+      console.log('Session check result:', session ? 'Session found' : 'No session', error ? 'Error:' + error.message : '');
+      
+      if (error) {
+        console.error('Session check error:', error);
+        setState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+        });
+        return;
+      }
+      
       if (session) {
-        const avatar_url = await fetchProfile(session.user.id);
+        // Set authenticated state immediately without waiting for profile
         setState({
           user: {
             id: session.user.id,
             email: session.user.email,
-            avatar_url,
+            avatar_url: null, // Will be updated later
           },
           isAuthenticated: true,
           isLoading: false,
+        });
+        
+        // Fetch profile in the background
+        fetchProfile(session.user.id).then(avatar_url => {
+          if (avatar_url) {
+            setState(prev => ({
+              ...prev,
+              user: {
+                ...prev.user!,
+                avatar_url,
+              },
+            }));
+          }
         });
       } else {
         setState({
@@ -57,20 +97,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           isLoading: false,
         });
       }
+    }).catch(error => {
+      console.error('Session check failed:', error);
+      setState({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+      });
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session ? 'Session found' : 'No session');
+      
       if (session) {
-        const avatar_url = await fetchProfile(session.user.id);
+        // Set authenticated state immediately without waiting for profile
         setState({
           user: {
             id: session.user.id,
             email: session.user.email,
-            avatar_url,
+            avatar_url: null, // Will be updated later
           },
           isAuthenticated: true,
           isLoading: false,
+        });
+        
+        // Fetch profile in the background
+        fetchProfile(session.user.id).then(avatar_url => {
+          if (avatar_url) {
+            setState(prev => ({
+              ...prev,
+              user: {
+                ...prev.user!,
+                avatar_url,
+              },
+            }));
+          }
         });
       } else {
         setState({
@@ -83,6 +145,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return () => {
       subscription.unsubscribe();
+      clearTimeout(loadingTimeout);
     };
   }, []);
 
@@ -125,7 +188,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       toast({
         title: "Account created",
-        description: "Welcome to NutriFit!",
+        description: "Welcome to NutriFit.ai!",
       });
     } catch (error: any) {
       toast({
