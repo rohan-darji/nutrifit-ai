@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,7 @@ import { NutritionDisplay } from "@/components/NutritionDisplay";
 import { useNutrition } from "@/contexts/NutritionContext";
 import { LogOut, User, History, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const HomePage: React.FC = () => {
   const { user, logout } = useAuth();
@@ -27,10 +29,23 @@ const HomePage: React.FC = () => {
             </Button>
             <Button variant="ghost" size="icon" asChild>
               <Link to="/profile">
-                <User className="h-5 w-5" />
+                <Avatar className="h-8 w-8">
+                  <AvatarImage 
+                    src={user?.avatar_url || undefined} 
+                    alt="User avatar" 
+                  />
+                  <AvatarFallback>
+                    {user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
+                  </AvatarFallback>
+                </Avatar>
               </Link>
             </Button>
-            <Button variant="ghost" size="icon" onClick={logout}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={logout}
+              className="hover:bg-accent/10"
+            >
               <LogOut className="h-5 w-5" />
             </Button>
           </div>
