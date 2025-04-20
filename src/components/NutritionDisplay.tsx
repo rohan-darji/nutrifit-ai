@@ -14,9 +14,15 @@ export const NutritionDisplay: React.FC = () => {
 
   // Helper function to extract numeric value from string like "45g (30%)"
   const extractPercentage = (value: string): number => {
-    const match = value.match(/\((\d+)%\)/);
-    return match ? parseInt(match[1], 10) : 0;
+    const percentMatch = value.match(/\((\d+)%\)/);
+    if (percentMatch) return parseInt(percentMatch[1], 10);
+  
+    const numberMatch = value.match(/^(\d+)(g|%)?/);
+    if (numberMatch) return Math.min(parseInt(numberMatch[1], 10), 100);
+  
+    return 0;
   };
+  
 
   return (
     <div className="w-full flex flex-col gap-6">

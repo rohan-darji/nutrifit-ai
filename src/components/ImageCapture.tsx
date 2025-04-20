@@ -24,13 +24,8 @@ export const ImageCapture: React.FC = () => {
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === "string") {
-          setPreviewUrl(reader.result);
-        }
-      };
-      reader.readAsDataURL(file);
+      const objectUrl = URL.createObjectURL(file);
+      setPreviewUrl(objectUrl);  
     }
   };
 

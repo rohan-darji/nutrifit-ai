@@ -12,29 +12,29 @@ interface NutritionContextType {
 }
 
 // Mock API function (in a real app, this would call your backend API)
-const mockAnalyzeFood = async (imageData: string): Promise<NutritionResult> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 2000));
+// const mockAnalyzeFood = async (imageData: string): Promise<NutritionResult> => {
+//   // Simulate API delay
+//   await new Promise(resolve => setTimeout(resolve, 2000));
   
-  // Return mock data
-  return {
-    total_calories: 450,
-    food_items: [
-      { item: "Avocado Toast", calories: 250 },
-      { item: "Boiled Egg", calories: 80 },
-      { item: "Cherry Tomatoes", calories: 20 },
-      { item: "Orange Juice", calories: 100 }
-    ],
-    healthiness: "Healthy",
-    nutrient_breakdown: {
-      carbohydrates: "45g (30%)",
-      protein: "22g (20%)",
-      fats: "25g (40%)",
-      fiber: "8g (30%)",
-      sugar: "12g (15%)",
-    }
-  };
-};
+//   // Return mock data
+//   return {
+//     total_calories: 450,
+//     food_items: [
+//       { item: "Avocado Toast", calories: 250 },
+//       { item: "Boiled Egg", calories: 80 },
+//       { item: "Cherry Tomatoes", calories: 20 },
+//       { item: "Orange Juice", calories: 100 }
+//     ],
+//     healthiness: "Healthy",
+//     nutrient_breakdown: {
+//       carbohydrates: "45g (30%)",
+//       protein: "22g (20%)",
+//       fats: "25g (40%)",
+//       fiber: "8g (30%)",
+//       sugar: "12g (15%)",
+//     }
+//   };
+// };
 
 const NutritionContext = createContext<NutritionContextType | undefined>(undefined);
 
@@ -48,16 +48,30 @@ export const NutritionProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     try {
       setIsAnalyzing(true);
       setImageUrl(imageData);
-      
-      // In a real app, you would send this image to your API
-      const analysisResult = await mockAnalyzeFood(imageData);
+  
+      // Convert base64 to Blob
+      const blob = await (await fetch(imageData)).blob();
+      const formData = new FormData();
+      formData.append("image", blob, "food.jpg");
+  
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/calculate-nutrition/`, {
+        method: "POST",
+        body: formData,
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to analyze image");
+      }
+  
+      const analysisResult: NutritionResult = await response.json();
       setResult(analysisResult);
-      
+  
       toast({
         title: "Analysis complete",
         description: "Your food nutrition information is ready!",
       });
     } catch (error) {
+      console.error("API error:", error);
       toast({
         title: "Analysis failed",
         description: "We couldn't analyze your food. Please try again.",
@@ -67,6 +81,7 @@ export const NutritionProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setIsAnalyzing(false);
     }
   };
+  
   
   const resetAnalysis = () => {
     setResult(null);
