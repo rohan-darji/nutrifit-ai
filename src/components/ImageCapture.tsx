@@ -1,13 +1,18 @@
-
 import React, { useRef, useState } from "react";
-import { Camera, Image, RefreshCw } from "lucide-react";
+import { Camera, Image, RefreshCw, X, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNutrition } from "@/contexts/NutritionContext";
 import { useToast } from "@/components/ui/use-toast";
 
 export const ImageCapture: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const [facingMode, setFacingMode] = useState<"user" | "environment">("environment");
+
+
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
   const { analyzeImage } = useNutrition();
   const { toast } = useToast();
 
@@ -23,38 +28,31 @@ export const ImageCapture: React.FC = () => {
         });
         return;
       }
-
       const objectUrl = URL.createObjectURL(file);
-      setPreviewUrl(objectUrl);  
+      setPreviewUrl(objectUrl);
     }
   };
 
   const handleCameraCapture = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      const video = document.createElement("video");
-      const canvas = document.createElement("canvas");
-      
-      // Wait for video to be ready
-      video.srcObject = stream;
-      await video.play();
-      
-      // Set canvas dimensions to match video
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      
-      // Capture frame from video
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      }
-      
-      // Convert to data URL
-      const dataUrl = canvas.toDataURL("image/jpeg");
-      setPreviewUrl(dataUrl);
-      
-      // Clean up
-      stream.getTracks().forEach(track => track.stop());
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode },
+      });
+      streamRef.current = stream;
+      setIsCameraOpen(true); // This triggers React to render the <video>
+  
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play().catch((err) => {
+            toast({
+              title: "Video playback failed",
+              description: String(err),
+              variant: "destructive",
+            });
+          });
+        }
+      }, 100); // Wait briefly for video to mount in DOM
     } catch (error) {
       toast({
         title: "Camera error",
@@ -63,6 +61,48 @@ export const ImageCapture: React.FC = () => {
       });
     }
   };
+  
+
+  const captureFromVideo = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL("image/jpeg");
+      setPreviewUrl(dataUrl);
+    }
+
+    stopCamera();
+    setIsCameraOpen(false);
+  };
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+  };
+
+  const handleSwitchCamera = () => {
+    // Toggle between 'user' and 'environment'
+    const newMode = facingMode === "user" ? "environment" : "user";
+    setFacingMode(newMode);
+  
+    // Stop current stream
+    stopCamera();
+  
+    // Restart camera with new mode
+    setTimeout(() => {
+      handleCameraCapture();
+    }, 100);
+  };
+  
 
   const handleUploadClick = () => {
     if (fileInputRef.current) {
@@ -89,14 +129,32 @@ export const ImageCapture: React.FC = () => {
     }
   };
 
+  const handleCancelCamera = () => {
+    stopCamera();
+    setIsCameraOpen(false);
+  };
+
+  const handleRetake = () => {
+    setPreviewUrl(null);
+    handleCameraCapture();
+  };
+
   return (
     <div className="w-full flex flex-col items-center gap-6">
       <div className="w-full max-w-md aspect-square rounded-xl overflow-hidden bg-secondary/50 border border-secondary flex items-center justify-center relative">
         {previewUrl ? (
-          <img 
-            src={previewUrl} 
-            alt="Food preview" 
+          <img
+            src={previewUrl}
+            alt="Food preview"
             className="w-full h-full object-cover"
+          />
+        ) : isCameraOpen ? (
+          <video
+            ref={videoRef}
+            className="w-full h-full object-cover"
+            autoPlay
+            muted
+            playsInline
           />
         ) : (
           <div className="text-center p-6">
@@ -119,23 +177,59 @@ export const ImageCapture: React.FC = () => {
       />
 
       <div className="w-full flex flex-col gap-4">
-        {previewUrl ? (
+        {isCameraOpen ? (
+          <div className="flex flex-col gap-4">
+          <Button onClick={captureFromVideo} size="lg" className="w-full">
+            📸 Capture Photo
+          </Button>
+          <div className="flex gap-4">
+            <Button onClick={handleSwitchCamera} variant="secondary" size="lg" className="w-full">
+              🔄 Switch Camera
+            </Button>
+            <Button
+              onClick={handleCancelCamera}
+              variant="destructive"
+              size="lg"
+              className="w-full"
+            >
+              <X className="w-4 h-4 mr-2" />
+              Cancel
+            </Button>
+          </div>
+        </div>
+        ) : previewUrl ? (
           <>
             <Button onClick={handleAnalyze} size="lg" className="w-full">
               Analyze Food
             </Button>
-            <Button onClick={handleReset} variant="outline" size="lg" className="w-full">
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Reset Image
-            </Button>
+            <div className="flex gap-4">
+              <Button onClick={handleRetake} variant="outline" size="lg" className="w-full">
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Retake
+              </Button>
+              <Button onClick={handleReset} variant="outline" size="lg" className="w-full">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Reset
+              </Button>
+            </div>
           </>
         ) : (
           <div className="grid grid-cols-2 gap-4">
-            <Button onClick={handleCameraCapture} variant="outline" size="lg" className="w-full">
+            <Button
+              onClick={handleCameraCapture}
+              variant="outline"
+              size="lg"
+              className="w-full"
+            >
               <Camera className="w-4 h-4 mr-2" />
               Camera
             </Button>
-            <Button onClick={handleUploadClick} variant="outline" size="lg" className="w-full">
+            <Button
+              onClick={handleUploadClick}
+              variant="outline"
+              size="lg"
+              className="w-full"
+            >
               <Image className="w-4 h-4 mr-2" />
               Gallery
             </Button>

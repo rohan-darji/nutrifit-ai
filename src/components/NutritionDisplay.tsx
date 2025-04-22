@@ -27,9 +27,13 @@ export const NutritionDisplay: React.FC = () => {
   return (
     <div className="w-full flex flex-col gap-6">
       <div className="flex justify-between items-center">
-        <Button variant="ghost" onClick={resetAnalysis} className="p-0 h-auto">
+        <Button
+          variant="ghost"
+          onClick={resetAnalysis}
+          className="hover:bg-accent text-white px-3 py-1 rounded-md flex items-center transition"
+        >
           <ArrowLeft className="w-5 h-5 mr-2" />
-          <span>Back</span>
+          <span className="text-base font-medium">Back</span>
         </Button>
       </div>
 
