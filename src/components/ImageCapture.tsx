@@ -160,7 +160,7 @@ export const ImageCapture: React.FC = () => {
         ) : isCameraOpen ? (
           <video
             ref={videoRef}
-            className={`w-full h-full object-cover ${facingMode === "user" ? "scale-x-[-1]" : ""}`}
+            className={`w-full h-full object-cover ${facingMode === "user" ? "scale-x-[1]" : ""}`}
             autoPlay
             muted
             playsInline
