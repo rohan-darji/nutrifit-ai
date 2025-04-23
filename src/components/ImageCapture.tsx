@@ -33,13 +33,14 @@ export const ImageCapture: React.FC = () => {
     }
   };
 
-  const handleCameraCapture = async () => {
+  const handleCameraCapture = async (mode: "user" | "environment" = facingMode) => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode },
+        video: { facingMode: mode },
       });
       streamRef.current = stream;
-      setIsCameraOpen(true); // This triggers React to render the <video>
+      setFacingMode(mode); // Update after starting camera
+      setIsCameraOpen(true);
   
       setTimeout(() => {
         if (videoRef.current) {
@@ -52,7 +53,7 @@ export const ImageCapture: React.FC = () => {
             });
           });
         }
-      }, 100); // Wait briefly for video to mount in DOM
+      }, 100);
     } catch (error) {
       toast({
         title: "Camera error",
@@ -61,6 +62,7 @@ export const ImageCapture: React.FC = () => {
       });
     }
   };
+  
   
 
   const captureFromVideo = () => {
@@ -99,17 +101,9 @@ export const ImageCapture: React.FC = () => {
   };
 
   const handleSwitchCamera = () => {
-    // Toggle between 'user' and 'environment'
     const newMode = facingMode === "user" ? "environment" : "user";
-    setFacingMode(newMode);
-  
-    // Stop current stream
     stopCamera();
-  
-    // Restart camera with new mode
-    setTimeout(() => {
-      handleCameraCapture();
-    }, 100);
+    handleCameraCapture(newMode); // Pass it directly
   };
   
 
@@ -160,7 +154,7 @@ export const ImageCapture: React.FC = () => {
         ) : isCameraOpen ? (
           <video
             ref={videoRef}
-            className={`w-full h-full object-cover ${facingMode === "user" ? "scale-x-[1]" : ""}`}
+            className={`w-full h-full object-cover ${facingMode === "user" ? "scale-x-[-1]" : ""}`}
             autoPlay
             muted
             playsInline
@@ -225,7 +219,7 @@ export const ImageCapture: React.FC = () => {
         ) : (
           <div className="grid grid-cols-2 gap-4">
             <Button
-              onClick={handleCameraCapture}
+              onClick={() => handleCameraCapture()}
               variant="outline"
               size="lg"
               className="w-full"
