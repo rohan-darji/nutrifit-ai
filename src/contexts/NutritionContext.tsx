@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState } from "react";
 import { NutritionResult } from "@/types";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface NutritionContextType {
   result: NutritionResult | null;
@@ -10,31 +11,6 @@ interface NutritionContextType {
   analyzeImage: (imageData: string) => Promise<void>;
   resetAnalysis: () => void;
 }
-
-// Mock API function (in a real app, this would call your backend API)
-// const mockAnalyzeFood = async (imageData: string): Promise<NutritionResult> => {
-//   // Simulate API delay
-//   await new Promise(resolve => setTimeout(resolve, 2000));
-  
-//   // Return mock data
-//   return {
-//     total_calories: 450,
-//     food_items: [
-//       { item: "Avocado Toast", calories: 250 },
-//       { item: "Boiled Egg", calories: 80 },
-//       { item: "Cherry Tomatoes", calories: 20 },
-//       { item: "Orange Juice", calories: 100 }
-//     ],
-//     healthiness: "Healthy",
-//     nutrient_breakdown: {
-//       carbohydrates: "45g (30%)",
-//       protein: "22g (20%)",
-//       fats: "25g (40%)",
-//       fiber: "8g (30%)",
-//       sugar: "12g (15%)",
-//     }
-//   };
-// };
 
 const NutritionContext = createContext<NutritionContextType | undefined>(undefined);
 
@@ -48,11 +24,24 @@ export const NutritionProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     try {
       setIsAnalyzing(true);
       setImageUrl(imageData);
+
+      // Get logged-in user
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+
+      if (error || !user) {
+        throw new Error("Unable to retrieve user from Supabase.");
+      }
+
+      const userId = user.id;
   
       // Convert base64 to Blob
       const blob = await (await fetch(imageData)).blob();
       const formData = new FormData();
       formData.append("image", blob, "food.jpg");
+      formData.append("user_id", userId);
   
       const response = await fetch(`${import.meta.env.VITE_API_URL}/calculate-nutrition/`, {
         method: "POST",
