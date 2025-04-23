@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   email?: string;
@@ -24,6 +23,7 @@ export interface NutritionResult {
   food_items: FoodItem[];
   healthiness: string;
   nutrient_breakdown: NutrientBreakdown;
+  is_safe_to_consume: boolean;
 }
 
 export interface AuthState {

@@ -1,11 +1,11 @@
-
 import React from "react";
 import { NutritionResult } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useNutrition } from "@/contexts/NutritionContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Flame } from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { ArrowLeft, Flame, ShieldCheck, ShieldAlert } from "lucide-react";
 
 export const NutritionDisplay: React.FC = () => {
   const { result, imageUrl, resetAnalysis } = useNutrition();
@@ -36,6 +36,27 @@ export const NutritionDisplay: React.FC = () => {
           <span className="text-base font-medium">Back</span>
         </Button>
       </div>
+
+      {/* Add Allergy Safety Alert */}
+      <Alert variant={result.is_safe_to_consume ? "default" : "destructive"}>
+        {result.is_safe_to_consume ? (
+          <>
+            <ShieldCheck className="h-5 w-5" />
+            <AlertTitle>Safe to Consume</AlertTitle>
+            <AlertDescription>
+              This food appears to be safe based on your allergy profile.
+            </AlertDescription>
+          </>
+        ) : (
+          <>
+            <ShieldAlert className="h-5 w-5" />
+            <AlertTitle>Allergy Warning</AlertTitle>
+            <AlertDescription>
+              This food may not be safe based on your allergy profile. Please exercise caution.
+            </AlertDescription>
+          </>
+        )}
+      </Alert>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {imageUrl && (
