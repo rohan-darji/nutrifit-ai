@@ -18,6 +18,9 @@ export default {
       },
     },
     extend: {
+      scale: {
+        '-1': '-1', // Add support for scale-x-[-1]
+      },
       colors: {
         background: "#18181a",
         foreground: "#ffffff",

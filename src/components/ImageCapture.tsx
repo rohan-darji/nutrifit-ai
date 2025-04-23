@@ -66,21 +66,30 @@ export const ImageCapture: React.FC = () => {
   const captureFromVideo = () => {
     const video = videoRef.current;
     if (!video) return;
-
+  
     const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-
+  
     const ctx = canvas.getContext("2d");
     if (ctx) {
+      if (facingMode === "user") {
+        // Flip canvas horizontally
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+      }
+  
+      // Draw after flip (or no flip)
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  
       const dataUrl = canvas.toDataURL("image/jpeg");
       setPreviewUrl(dataUrl);
     }
-
+  
     stopCamera();
     setIsCameraOpen(false);
   };
+  
 
   const stopCamera = () => {
     if (streamRef.current) {
@@ -151,7 +160,7 @@ export const ImageCapture: React.FC = () => {
         ) : isCameraOpen ? (
           <video
             ref={videoRef}
-            className="w-full h-full object-cover"
+            className={`w-full h-full object-cover ${facingMode === "user" ? "scale-x-[-1]" : ""}`}
             autoPlay
             muted
             playsInline
