@@ -183,7 +183,10 @@ const AuthPage: React.FC = () => {
               <Leaf className="h-10 w-10 text-primary" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold">NutriFit.ai</h1>
+          <h1 className="text-3xl font-bold">
+            <span className="text-white">NutriFit</span>
+            <span className="text-[#4ADE80]">.ai</span>
+          </h1>
           <p className="text-muted-foreground mt-2">Your personal food nutrition analyzer</p>
         </div>
 

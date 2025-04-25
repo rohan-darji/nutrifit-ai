@@ -16,7 +16,10 @@ const HomePage: React.FC = () => {
     <div className="min-h-screen bg-background">
       <header className="p-4 border-b border-secondary">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold">NutriFit.ai</h1>
+          <h1 className="text-xl font-bold">
+            <span className="text-white">NutriFit</span>
+            <span className="text-[#4ADE80]">.ai</span>
+          </h1>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" asChild>
               <Link to="/profile">
@@ -35,7 +38,7 @@ const HomePage: React.FC = () => {
               variant="ghost" 
               size="icon" 
               onClick={logout}
-              className="hover:bg-accent/10"
+              className="hover:bg-[#4ADE80]/10 hover:text-white"
             >
               <LogOut className="h-5 w-5" />
             </Button>

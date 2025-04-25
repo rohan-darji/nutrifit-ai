@@ -131,7 +131,7 @@ export const ProfileSection = () => {
               />
               <Button 
                 onClick={updateProfile} 
-                className="bg-accent hover:bg-accent/90 text-white"
+                className="bg-[#4ADE80] hover:bg-[#4ADE80]/90 text-black"
               >
                 Update Profile
               </Button>

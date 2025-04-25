@@ -5,7 +5,12 @@ import { Camera, ChevronRight, Info, User } from "lucide-react";
 
 const onboardingSteps = [
   {
-    title: "Welcome to NutriFit.ai",
+    title: (
+      <>
+        <span className="text-white">Welcome to NutriFit</span>
+        <span className="text-[#4ADE80]">.ai</span>
+      </>
+    ),
     description: "Discover the nutritional content of any food just by taking a photo.",
     icon: Info,
     color: "bg-primary",
