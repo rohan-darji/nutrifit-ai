@@ -2,7 +2,13 @@
 
 ## Project Overview
 
-NutriFit.ai is a web application that helps users analyze their food nutrition. The application provides personalized nutrition insights and recommendations based on user input.
+NutriFit.ai is a web application that helps users analyze their food nutrition. The application provides personalized nutrition insights and recommendations based on user input. The application uses Gemini API for processing uploaded food images and providing detailed nutritional analysis.
+
+## Live Demo
+
+The application is currently hosted on:
+- Frontend: [https://nutrifit-ai-red.vercel.app/](https://nutrifit-ai-red.vercel.app/)
+- Backend: Hosted on Render
 
 ## How can I edit this code?
 
@@ -54,20 +60,8 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 - Supabase (Authentication & Database)
+- Gemini API (Image Processing & Nutrition Analysis)
 
-## How can I deploy this project?
-
-You can deploy this project using various hosting platforms:
-
-1. **Vercel**: Connect your GitHub repository to Vercel for automatic deployments
-2. **Netlify**: Connect your GitHub repository to Netlify for automatic deployments
-3. **GitHub Pages**: Set up GitHub Actions to deploy to GitHub Pages
-
-## Can I connect a custom domain to my project?
-
-Yes, you can!
-
-Most hosting platforms like Vercel, Netlify, and GitHub Pages allow you to connect custom domains to your projects. Check the documentation of your chosen hosting platform for specific instructions on how to set up a custom domain.
 
 ## License
 
